@@ -74,7 +74,7 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
         g.add_node(row['paper_id'], group='work')
         g.add_node(row['paper_author_id'], group='author')
         g.add_node(row['id'], group='affiliation',
-                   title=row['display_name'] + '\n' + row['country_code'])
+                   title=row['display_name'])
         if row['source']:
             g.add_node(row['source'], group=row['source_type'],
                       title=row['source'] + ' :\n ' + row['source_type'])
