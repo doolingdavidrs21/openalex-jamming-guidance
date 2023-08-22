@@ -71,20 +71,55 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
     """
     g = nx.Graph() # dc['paper_cluster'] == cl
     for index, row in df[df['paper_cluster'] == cl].iterrows():
-        g.add_node(row['paper_id'], group='work')
-        g.add_node(row['paper_author_id'], group='author')
+        g.add_node(row['paper_id'], group='work', title=row['paper_title'])
+        g.add_node(row['paper_author_id'], title=row['paper_author_display_name'],group='author')
         g.add_node(row['id'], group='affiliation',
-                   title=row['display_name'])
+                   title=row['display_name'] + '\n' + row['country_code'])
         if row['source']:
             g.add_node(row['source'], group=row['source_type'],
                       title=row['source'] + ' :\n ' + row['source_type'])
             g.add_edge(
                 row['paper_id'],
                 row['source'],
+                weight = 10,
                 title=row['paper_title'] + ' :\n ' + str(row['paper_publication_date']) +  \
                 ' :\n' + row['source'] + ' :\n ' + \
                 row['source_type']
             )
+            g.add_edge(
+                row['paper_author_id'],
+                row['source'],
+                title=row['paper_author_display_name'] + ':\n' + row['source']
+            )
+        if len(row['funder_list']) > 0:
+            for f in row['funder_list']:
+                g.add_node(f, group='funder',
+                          title=str(f))
+                g.add_edge(
+                       row['paper_id'],
+                       f,
+                       title=row['paper_title'] + ':\n ' +  str(row['paper_publication_date']) + \
+                       ' :\n' + str(f)
+                   )
+                g.add_edge(
+                       f,
+                       row['paper_author_id'],
+                       title=row['paper_author_display_name'] + ' :\n ' + \
+                       str(f)
+                       
+                   )
+                g.add_edge(
+                       f,
+                       row['id'],
+                       title=row['display_name'] + '\n' + row['country_code'] + ' :\n ' + \
+                       str(f)                       
+                   )  
+                if row["source"]:
+                    g.add_edge(
+                        f,
+                        row["source"],
+                        title=row["source"] + ' :\n' + str(f)
+                    )
         g.nodes[row['paper_id']]['title'] = (
             row['paper_title'] + ' :\n ' + str(row['paper_publication_date'] + ':\n' + 
             '\n'.join(kw_dict[row['paper_id']]))
@@ -95,12 +130,14 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
         g.add_edge(
             row['paper_id'],
             row['paper_author_id'],
+            weight = 5,
         title=row['paper_title'] + ' :\n ' + row['paper_author_display_name'] + ' :\n ' + \
             row['paper_raw_affiliation_string']
         )
         g.add_edge(
             row['paper_id'],
             row['id'],
+            weight = 15,
             title=row['paper_title'] + ' :\n ' + str(row['paper_publication_date']) + ':\n' + 
             row['display_name'] + ' :\n ' + row['country_code']
         )
@@ -135,11 +172,12 @@ def create_pyvis_html(cl: int, filename: str = "pyvis_coauthorships_graph.html")
               # default_node_size=1,
                 font_color="white",
                 directed=False,
-              #  select_menu=True,
-              #  filter_menu=True,
+               # select_menu=True,
+                filter_menu=True,
                 notebook=False,
                )
     h.from_nx(g_nx, show_edge_weights=False)
+    #h.barnes_hut()
     neighbor_map = h.get_adj_list()
    # for node in h.nodes:
    #     if node['group'] == 'author':
@@ -176,6 +214,7 @@ const options = {
   }
     """
     )
+    #h.show_buttons(filter_=['physics'])
     try:
         path = './tmp'
         h.save_graph(f"{path}/{filename}")
@@ -475,7 +514,7 @@ with tab7:
     st.data_editor(
         dfcollab[['x', 'y', 'id','collab_countries', 'title', 'doi', 'cluster', 'probability',
        'publication_date', 'keywords', 'top_concepts', 'affil_list',
-       'author_list']],
+       'author_list','funder_list']],
         column_config={
             "doi": st.column_config.LinkColumn("doi"),
         },
