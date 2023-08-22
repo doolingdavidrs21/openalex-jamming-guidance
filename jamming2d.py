@@ -135,6 +135,12 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
             row['paper_raw_affiliation_string']
         )
         g.add_edge(
+            row['paper_author_id'],
+            row['id'],
+            title=row['paper_author_display_name'] + ' :\n ' + \
+            row['display_name'] + ' :\n ' + row['country_code']
+        )
+        g.add_edge(
             row['paper_id'],
             row['id'],
             weight = 15,
