@@ -81,7 +81,6 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
             g.add_edge(
                 row['paper_id'],
                 row['source'],
-                weight = 10,
                 title=row['paper_title'] + ' :\n ' + str(row['paper_publication_date']) +  \
                 ' :\n' + row['source'] + ' :\n ' + \
                 row['source_type']
@@ -130,7 +129,6 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
         g.add_edge(
             row['paper_id'],
             row['paper_author_id'],
-            weight = 5,
         title=row['paper_title'] + ' :\n ' + row['paper_author_display_name'] + ' :\n ' + \
             row['paper_raw_affiliation_string']
         )
@@ -143,7 +141,6 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
         g.add_edge(
             row['paper_id'],
             row['id'],
-            weight = 15,
             title=row['paper_title'] + ' :\n ' + str(row['paper_publication_date']) + ':\n' + 
             row['display_name'] + ' :\n ' + row['country_code']
         )
@@ -154,8 +151,8 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
     allnodes = list(g.nodes())
     coords_dict = {allnodes[i]:(coords[i][0], coords[i][1]) for i in range(len(allnodes))}
     for i in g.nodes():
-        g.nodes[i]['x'] = 500 * coords_dict[i][0] # the scale factor needed 
-        g.nodes[i]['y'] = 500 * coords_dict[i][1]
+        g.nodes[i]['x'] = 250 * coords_dict[i][0] # the scale factor needed 
+        g.nodes[i]['y'] = 250 * coords_dict[i][1]
     return g
                 
                 
