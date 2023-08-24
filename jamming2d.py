@@ -70,54 +70,82 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
     from the source and target columns for each row.
     """
     g = nx.Graph() # dc['paper_cluster'] == cl
+    dc = df[df['paper_cluster'] == cl]
+    author_counts = dc['paper_author_id'].tolist()
+    author_counts_dict = {c:author_counts.count(c) for c in author_counts}
+    affiliation_counts = dc['id'].tolist()
+    affiliation_counts_dict = {c:affiliation_counts.count(c) for c in affiliation_counts}
+    source_counts = dc['source'].tolist()
+    source_counts_dict = {c:source_counts.count(c) for c in source_counts}
+    funder_counts = [x for row in dc['funder_list'].tolist() for x in row]
+    funder_counts_dict = {c:funder_counts.count(c) for c in funder_counts}
     for index, row in df[df['paper_cluster'] == cl].iterrows():
         g.add_node(row['paper_id'], group='work', title=row['paper_title'])
-        g.add_node(row['paper_author_id'], title=row['paper_author_display_name'],group='author')
+        g.add_node(row['paper_author_id'], title=row['paper_author_display_name'],
+                   group='author',value = author_counts_dict[row['paper_author_id']])
         g.add_node(row['id'], group='affiliation',
-                   title=row['display_name'] + '\n' + row['country_code'])
+                   title=row['display_name'] + '\n' + row['country_code'],
+                  value = affiliation_counts_dict[row['id']])
         if row['source']:
             g.add_node(row['source'], group=row['source_type'],
-                      title=row['source'] + ' :\n ' + row['source_type'])
+                      title=row['source'] + ' :\n ' + row['source_type'],
+                      value=source_counts_dict[row['source']])
             g.add_edge(
                 row['paper_id'],
                 row['source'],
                 title=row['paper_title'] + ' :\n ' + str(row['paper_publication_date']) +  \
                 ' :\n' + row['source'] + ' :\n ' + \
-                row['source_type']
+                row['source_type'],
+              #  weight = df[(df['paper_id'] == row['paper_id']) & \
+              #              (df['source'] == row['source'])]['paper_cluster_score'].sum()
+               # weight = row['paper_cluster_score']
             )
             g.add_edge(
                 row['paper_author_id'],
                 row['source'],
-                title=row['paper_author_display_name'] + ':\n' + row['source']
+                title=row['paper_author_display_name'] + ':\n' + row['source'],
+             #   weight = df[(df['paper_author_id'] == row['paper_author_id']) & \
+              #              (df['source'] == row['source'])]['paper_cluster_score'].sum()
+               # weight = row['paper_cluster_score']
+            )
+            g.add_edge(
+                row['id'],
+                row['source'],
+                title=row['display_name'] + ':\n' + row['source']
             )
         if len(row['funder_list']) > 0:
             for f in row['funder_list']:
                 g.add_node(f, group='funder',
-                          title=str(f))
+                          title=str(f),
+                          value=funder_counts_dict[f])
                 g.add_edge(
                        row['paper_id'],
                        f,
                        title=row['paper_title'] + ':\n ' +  str(row['paper_publication_date']) + \
-                       ' :\n' + str(f)
+                       ' :\n' + str(f),
+                  #  weight = row['paper_cluster_score']
                    )
                 g.add_edge(
                        f,
                        row['paper_author_id'],
                        title=row['paper_author_display_name'] + ' :\n ' + \
-                       str(f)
+                       str(f),
+                  #  weight = row['paper_cluster_score']
                        
                    )
                 g.add_edge(
                        f,
                        row['id'],
                        title=row['display_name'] + '\n' + row['country_code'] + ' :\n ' + \
-                       str(f)                       
+                       str(f)  ,
+                  #  weight = row['paper_cluster_score']
                    )  
                 if row["source"]:
                     g.add_edge(
                         f,
                         row["source"],
-                        title=row["source"] + ' :\n' + str(f)
+                        title=row["source"] + ' :\n' + str(f),
+                     #   weight = row['paper_cluster_score']
                     )
         g.nodes[row['paper_id']]['title'] = (
             row['paper_title'] + ' :\n ' + str(row['paper_publication_date'] + ':\n' + 
@@ -130,23 +158,29 @@ def create_nx_graph(df: pd.DataFrame, cl:int) -> nx.Graph:
             row['paper_id'],
             row['paper_author_id'],
         title=row['paper_title'] + ' :\n ' + row['paper_author_display_name'] + ' :\n ' + \
-            row['paper_raw_affiliation_string']
+            row['paper_raw_affiliation_string'],
+         #   weight = row['paper_cluster_score']
         )
         g.add_edge(
             row['paper_author_id'],
             row['id'],
             title=row['paper_author_display_name'] + ' :\n ' + \
-            row['display_name'] + ' :\n ' + row['country_code']
+            row['display_name'] + ' :\n ' + row['country_code'],
+          #  weight = row['paper_cluster_score']
         )
         g.add_edge(
             row['paper_id'],
             row['id'],
             title=row['paper_title'] + ' :\n ' + str(row['paper_publication_date']) + ':\n' + 
-            row['display_name'] + ' :\n ' + row['country_code']
+            row['display_name'] + ' :\n ' + row['country_code'],
+         #   weight = row['paper_cluster_score']
         )
         
     g_ig = ig.Graph.from_networkx(g) # assign 'x', and 'y' to g before returning
-    layout = g_ig.layout_auto()
+    #layout = g_ig.layout_auto()
+    #layout = g_ig.layout_davidson_harel()
+    layout = g_ig.layout_umap(min_dist = 2, epochs = 500)
+    # https://igraph.org/python/tutorial/0.9.6/visualisation.html
     coords = layout.coords
     allnodes = list(g.nodes())
     coords_dict = {allnodes[i]:(coords[i][0], coords[i][1]) for i in range(len(allnodes))}
@@ -179,8 +213,11 @@ def create_pyvis_html(cl: int, filename: str = "pyvis_coauthorships_graph.html")
                 filter_menu=True,
                 notebook=False,
                )
+    #h.repulsion()
     h.from_nx(g_nx, show_edge_weights=False)
     #h.barnes_hut()
+    #h.repulsion(node_distance=40,
+    #            central_gravity=-0.2, spring_length=5, spring_strength=0.005, damping=0.09)
     neighbor_map = h.get_adj_list()
    # for node in h.nodes:
    #     if node['group'] == 'author':
@@ -193,15 +230,18 @@ def create_pyvis_html(cl: int, filename: str = "pyvis_coauthorships_graph.html")
    #         i += 4
    #     node["title"] += "\n Neighbors: \n" + " | ".join(a)
    #     node["value"] = len(neighbor_map[node["id"]]) 
+# "physics": {
+#    "enabled": false
+#  },
     h.set_options(
     """
 const options = {
   "interaction": {
     "navigationButtons": false
   },
-  "physics": {
-    "enabled": false
-  },
+ "physics": {
+     "enabled": false
+ },
   "edges": {
     "color": {
         "inherit": true
@@ -218,6 +258,8 @@ const options = {
     """
     )
     #h.show_buttons(filter_=['physics'])
+  #  h.barnes_hut()
+    #h.repulsion()
     try:
         path = './tmp'
         h.save_graph(f"{path}/{filename}")
@@ -510,7 +552,7 @@ with tab5:
 
 with tab6:
     st.write("Coauthorship Graph (Papers and Authors)")
-    components.html(htmlfile.read(), height=700)
+    components.html(htmlfile.read(), height=1100)
     
 with tab7:
     st.write("Country-Country Collaborations")
