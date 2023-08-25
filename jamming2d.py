@@ -512,7 +512,7 @@ def get_time_series(dg, cl:int):
 tab1, tab2, tab3, tab4 , tab5, tab6, tab7, tab8= st.tabs(["Countries", "Affiliations", "Authors",
                                         "Journals","Conferences",
  "Coauthorship Graph", "Country-Country Collaborations",
-                    "time evolutation of topic"])
+                    "time evolution of topic"])
 
 dvauthor, kwwuathor = get_author_cluster_sort(dftriple, selected_cluster)
 #st.dataframe(dvauthor)
