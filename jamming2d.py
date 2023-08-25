@@ -10,6 +10,7 @@ import igraph as ig
 from streamlit_plotly_events import plotly_events
 import math
 import plotly.io as pio
+import altair as alt
 #pio.templates.default = "plotly"  
 # https://towardsdatascience.com/how-to-deploy-interactive-pyvis-network-graphs-on-streamlit-6c401d4c99db
 pio.templates.default = "plotly_dark"
@@ -23,6 +24,10 @@ st.markdown("""
 * Electronic warfare (combat involving electronics and directed energy), радиоэлектронная борьба, 電子作戰
 * Network-centric warfare, Сетецентрическая война, 網絡中心戰
 * Missile guidance (variety of methods of guiding a missile), 导弹制导, Система самонаведения
+* Automatic target recognition (ability to automatically recognize targets), 自动目标识别, Otomatik hedef tanıma
+* Weapon target assignment problem, Задача о назначении целей
+* Robot manipulator, 音樂調整器, манипулятор
+* Command and control
 """)
 
 st.write("Topic modeling")
@@ -489,11 +494,25 @@ def get_country_collaborations_sort(dc:pd.DataFrame, cl:int):
     return di[di['country_count'] > 1]
 
 
+def get_time_series(dg, cl:int):
+    """
+    takes dg and the cluster number cl
+    and returns a time series chart
+    by month, y-axis is the article count
+    """
+    dftime = dg[dg.cluster == cl][['cluster','probability','publication_date']].copy()
+    dftime['date'] = pd.to_datetime(dftime['publication_date'])
+    dftime.sort_values('date', inplace=True)
+    #by_month = pd.to_datetime(dftime['date']).dt.to_period('M').value_counts().sort_index()
+    #by_month.index = pd.PeriodIndex(by_month.index)
+    #df_month = by_month.rename_axis('month').reset_index(name='counts')
+    return dftime
 
 
-tab1, tab2, tab3, tab4 , tab5, tab6, tab7= st.tabs(["Countries", "Affiliations", "Authors",
+tab1, tab2, tab3, tab4 , tab5, tab6, tab7, tab8= st.tabs(["Countries", "Affiliations", "Authors",
                                         "Journals","Conferences",
- "Coauthorship Graph", "Country-Country Collaborations"])
+ "Coauthorship Graph", "Country-Country Collaborations",
+                    "time evolutation of topic"])
 
 dvauthor, kwwuathor = get_author_cluster_sort(dftriple, selected_cluster)
 #st.dataframe(dvauthor)
@@ -510,6 +529,8 @@ dvjournals, kwjournals = get_journals_cluster_sort(dftriple, selected_cluster)
 dvconferences, kwconferences = get_conferences_cluster_sort(dftriple, selected_cluster)
 
 htmlfile = create_pyvis_html(selected_cluster)
+
+dftime = get_time_series(dfinfo, selected_cluster)
 
 with tab1:
     st.dataframe(dc)
@@ -565,3 +586,14 @@ with tab7:
         },
         hide_index=True,
     )
+    
+with tab8:
+    alt_chart= alt.Chart(dftime).mark_line().transform_fold(
+    ['probability']
+        ).encode(
+        x = 'yearmonth(date):T',
+        y = 'sum(value):Q',
+        color='key:N'
+    ).interactive()
+    st.altair_chart(alt_chart, use_container_width=True)
+    
