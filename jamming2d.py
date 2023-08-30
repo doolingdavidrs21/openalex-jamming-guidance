@@ -545,7 +545,7 @@ with tab1:
     st.dataframe(dc)
 with tab2:
     st.markdown("highlight and click a value in the **id** column to be given more information")
-    st.data_editor(
+    st.dataframe(
         dvaffils,
         column_config={
             "id": st.column_config.LinkColumn("id"),
@@ -555,7 +555,7 @@ with tab2:
     #st.dataframe(dvaffils)
 with tab3:
     st.write("highlight and click a value in the **paper_author_id** to be given more information")
-    st.data_editor(
+    st.dataframe(
         dvauthor,
         column_config={
             "paper_author_id": st.column_config.LinkColumn("paper_author_id")
@@ -569,7 +569,7 @@ with tab4:
    #     dvjournals[['journal','paper_cluster_score']],
    #     hide_index=True
    # )
-    st.data_editor(
+    st.dataframe(
         dvjournals,
         column_config={
             "homepage_url": st.column_config.LinkColumn("homepage_url")
@@ -600,7 +600,7 @@ with tab6:
     
 with tab7:
     st.write("Country-Country Collaborations")
-    st.data_editor(
+    st.dataframe(
         dfcollab[['x', 'y', 'id','collab_countries', 'title', 'doi', 'cluster', 'probability',
        'publication_date', 'keywords', 'top_concepts', 'affil_list',
        'author_list','funder_list']],
