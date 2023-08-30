@@ -5,6 +5,7 @@ First run the notebook **jamming2d.ipynb** to create the data files:
 * jammingcentroids2d.pkl
 * jammingdfinfo2d.pkl
 * jammingdftriple2d.pkl
+* source_page_dict.pkl
 
 compress these files with
 ```
