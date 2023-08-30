@@ -479,7 +479,7 @@ def get_conferences_cluster_sort(dc:pd.DataFrame, cl:int):
     dv = dg[dg['source_type'] == 'conference'].groupby(['source'])['paper_cluster_score'].sum().to_frame()
     dv.sort_values('paper_cluster_score', ascending=False, inplace=True)
     dv['conference'] = dv.index
-    dv['homepage_url'] = dv['conference'].map(source_dict)
+   # dv['homepage_url'] = dv['conference'].map(source_dict)
     kw = centroids[centroids.cluster == cl]['keywords'].iloc[0]
     return dv, kw
 
@@ -580,17 +580,17 @@ with tab4:
     
 with tab5:
     st.write("Conferences most representative of this cluster")
-   # st.dataframe(
-   #     dvconferences[['conference','paper_cluster_score']],
-   #     hide_index=True
-   # )
-    st.data_editor(
-        dvconferences,
-        column_config={
-            "homepage_url": st.column_config.LinkColumn("homepage_url")
-        },
-        hide_index=True,
+    st.dataframe(
+        dvconferences[['conference','paper_cluster_score']],
+        hide_index=True
     )
+  #  st.data_editor(
+  #      dvconferences,
+  #      column_config={
+  #          "homepage_url": st.column_config.LinkColumn("homepage_url")
+  #      },
+  #      hide_index=True,
+  #  )
     
 # https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9266366
 
