@@ -464,7 +464,7 @@ def get_journals_cluster_sort(dc:pd.DataFrame, cl:int):
     dv['journal'] = dv.index
     dv['homepage_url'] = dv['journal'].map(source_dict)
     kw = centroids[centroids.cluster == cl]['keywords'].iloc[0]
-    return dv, kw
+    return dv[['journal','homepage_url','paper_cluster_score']], kw
 
 
 def get_conferences_cluster_sort(dc:pd.DataFrame, cl:int):
