@@ -11,6 +11,7 @@ from streamlit_plotly_events import plotly_events
 import math
 import plotly.io as pio
 import altair as alt
+import pickle
 #pio.templates.default = "plotly"  
 # https://towardsdatascience.com/how-to-deploy-interactive-pyvis-network-graphs-on-streamlit-6c401d4c99db
 pio.templates.default = "plotly_dark"
@@ -57,6 +58,11 @@ def load_dfinfo_asat():
 #    return dg
 
 
+@st.cache_data()
+def load_source_dict():
+    with open("source_page_dict.pkl", "rb") as f:
+        source_dict = pickle.load(f)
+    return source_dict
 
 
 
@@ -65,6 +71,7 @@ dftriple = load_dftriple_asat()
 dfinfo = load_dfinfo_asat()
 dfinfo['cluster_'] = dfinfo["cluster"].apply(str)
 #dfgeo = load_dfgeo_asat()
+source_dict = load_source_dict()
 
 kw_dict = dfinfo['keywords'].to_dict()
 
@@ -455,6 +462,7 @@ def get_journals_cluster_sort(dc:pd.DataFrame, cl:int):
     dv = dg[dg['source_type'] == 'journal'].groupby(['source'])['paper_cluster_score'].sum().to_frame()
     dv.sort_values('paper_cluster_score', ascending=False, inplace=True)
     dv['journal'] = dv.index
+    dv['hompage_url'] = dv['journal'].map(source_dict)
     kw = centroids[centroids.cluster == cl]['keywords'].iloc[0]
     return dv, kw
 
@@ -471,6 +479,7 @@ def get_conferences_cluster_sort(dc:pd.DataFrame, cl:int):
     dv = dg[dg['source_type'] == 'conference'].groupby(['source'])['paper_cluster_score'].sum().to_frame()
     dv.sort_values('paper_cluster_score', ascending=False, inplace=True)
     dv['conference'] = dv.index
+    dv['hompage_url'] = dv['conference'].map(source_dict)
     kw = centroids[centroids.cluster == cl]['keywords'].iloc[0]
     return dv, kw
 
@@ -555,18 +564,32 @@ with tab3:
     )
     
 with tab4:
-    st.write("Journals most representative of this cluseter")
-    st.dataframe(
-        dvjournals[['journal','paper_cluster_score']],
-        hide_index=True
+    st.write("Journals most representative of this cluster")
+   # st.dataframe(
+   #     dvjournals[['journal','paper_cluster_score']],
+   #     hide_index=True
+   # )
+    st.data_editor(
+        dvjournals,
+        column_config={
+            "homepage_url": st.column_config.LinkColumn("homepage_url")
+        },
+        hide_index=True,
     )
 
     
 with tab5:
-    st.write("Conferences most representative of this cluseter")
-    st.dataframe(
-        dvconferences[['conference','paper_cluster_score']],
-        hide_index=True
+    st.write("Conferences most representative of this cluster")
+   # st.dataframe(
+   #     dvconferences[['conference','paper_cluster_score']],
+   #     hide_index=True
+   # )
+    st.data_editor(
+        dvconferences,
+        column_config={
+            "homepage_url": st.column_config.LinkColumn("homepage_url")
+        },
+        hide_index=True,
     )
     
 # https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9266366
