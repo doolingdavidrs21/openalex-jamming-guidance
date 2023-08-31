@@ -670,9 +670,9 @@ with tab9:
     st.write(dg.head())
     mean_lon = dg['longitude'].mean()
     cl_initial_view = pdk.ViewState(
-        latitude = mean_lat,
-        longitude = mean_lon,
-        zoom = 11
+        latitude = dg['latitude'].iloc[0],
+        longitude = dg['longitude'].iloc[0],
+        zoom = 8
     )
     sp_layer = pdk.Layer(
         'ScatterplotLayer',
