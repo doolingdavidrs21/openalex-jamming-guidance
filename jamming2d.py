@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import streamlit as st
 import streamlit.components.v1 as components
 from pyvis.network import Network
+from st_aggrid import AgGrid, GridUpdateMode, JsCode
+from st_aggrid.grid_options_builder import GridOptionsBuilder
 import networkx as nx
 import igraph as ig
 from streamlit_plotly_events import plotly_events
@@ -301,6 +303,22 @@ const options = {
 #st.map(dfgeo)
 
 st.dataframe(centroids[['cluster','x','y','concepts','keywords']])
+#AgGrid(centroids[['cluster','x','y','concepts','keywords']])
+# https://medium.com/@hhilalkocak/streamlit-aggrid-6dbbab3afe03
+#gd = GridOptionsBuilder.from_dataframe(centroids[['cluster','x','y','concepts','keywords']])
+#gd.configure_pagination(enabled=True)
+#gridOptions = gd.build()
+#AgGrid(centroids[['cluster','x','y','concepts','keywords']],
+#       height=500
+#      )
+#AgGrid(centroids[['cluster','x','y','concepts','keywords']],
+#                   fit_columns_on_grid_load=True,
+#                   height=500,
+#                   width='100%',
+#                   theme="streamlit",
+#                   reload_data=True,
+#                   allow_unsafe_jscode=True
+#                  )
 
 @st.cache_data()
 def get_fig_asat():
@@ -379,29 +397,37 @@ try:
         (dfinfo["x"] == selected_x_value)
         & (dfinfo["y"] == selected_y_value)
     ]
-
-#def make_clickable(url, name):
-#    return '<a href="{}" rel="noopener noreferrer" target="_blank">{}</a>'.format(url,name)
-
-#df_selected['link'] = df_selected.apply(lambda x: make_clickable(x['id'], x['id']), axis=1)
-    st.data_editor(
-        df_selected[['x', 'y', 'id', 'title', 'doi', 'cluster', 'probability',
-       'publication_date', 'keywords', 'top_concepts', 'affil_list',
-       'author_list']],
-        column_config={
-            "doi": st.column_config.LinkColumn("doi"),
-            "id": st.column_config.LinkColumn("id")
-        },
-        hide_index=True,
-        )
     selected_cluster = df_selected['cluster'].iloc[0]
-    st.write(selected_cluster)
 except:
     df_selected_centroid = centroids[
         (centroids["x"] == selected_x_value)
         & (centroids["y"] == selected_y_value)
     ]
     selected_cluster = df_selected_centroid['cluster'].iloc[0]
+
+
+#def make_clickable(url, name):
+#    return '<a href="{}" rel="noopener noreferrer" target="_blank">{}</a>'.format(url,name)
+
+#df_selected['link'] = df_selected.apply(lambda x: make_clickable(x['id'], x['id']), axis=1)
+#    st.data_editor(
+#        df_selected[['x', 'y', 'id', 'title', 'doi', 'cluster', 'probability',
+#       'publication_date', 'keywords', 'top_concepts', 'affil_list',
+#       'author_list']],
+#        column_config={
+#            "doi": st.column_config.LinkColumn("doi"),
+#            "id": st.column_config.LinkColumn("id")
+#        },
+#        hide_index=True,
+#        )
+#    selected_cluster = df_selected['cluster'].iloc[0]
+#    st.write(selected_cluster)
+#except:
+#    df_selected_centroid = centroids[
+#        (centroids["x"] == selected_x_value)
+#        & (centroids["y"] == selected_y_value)
+#    ]
+#    selected_cluster = df_selected_centroid['cluster'].iloc[0]
     
     
 
@@ -412,8 +438,24 @@ except:
 df_selected_centroid = centroids[
     (centroids['cluster'] == selected_cluster)
 ]
-st.write(f"selected cluster: {selected_cluster}")
+df_selected_papers = dfinfo[
+    (dfinfo['cluster'] == selected_cluster)
+].sort_values('probability',ascending=False)
+st.write(f"selected topic: {selected_cluster}")
 st.dataframe(df_selected_centroid[['concepts','keywords','x','y']])
+st.write(f"publications in topic: {selected_cluster}")
+st.data_editor(
+        df_selected_papers[['x', 'y', 'id', 'title', 'doi', 'cluster', 
+       'publication_date', 'keywords', 'top_concepts', 'affil_list',
+       'author_list','probability']],
+        column_config={
+            "doi": st.column_config.LinkColumn("doi"),
+            "id": st.column_config.LinkColumn("id")
+        },
+        hide_index=True,
+        )
+
+
 
 
 def get_country_cluster_sort(dc:pd.DataFrame, cl:int):
