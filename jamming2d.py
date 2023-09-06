@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 import streamlit as st
 import streamlit.components.v1 as components
 from pyvis.network import Network
-from st_aggrid import AgGrid, GridUpdateMode, JsCode
-from st_aggrid.grid_options_builder import GridOptionsBuilder
+#from st_aggrid import AgGrid, GridUpdateMode, JsCode
+#from st_aggrid.grid_options_builder import GridOptionsBuilder
 import networkx as nx
 import igraph as ig
 from streamlit_plotly_events import plotly_events
