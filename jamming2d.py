@@ -722,7 +722,7 @@ with tab9:
         get_position = ['longitude','latitude'],
         radius_scale = 75,
         radius_min_pixels=5,
-      #  radius_max_pixels=300,
+        radius_max_pixels=300,
         line_width_min_pixels=1,
        # get_radius = 300,
         get_radius = "size",
