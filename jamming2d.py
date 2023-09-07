@@ -16,6 +16,7 @@ import altair as alt
 import pickle
 import pydeck as pdk
 #pio.templates.default = "plotly"  
+# https://docs.streamlit.io/knowledge-base/using-streamlit/how-download-pandas-dataframe-csv
 # https://towardsdatascience.com/how-to-deploy-interactive-pyvis-network-graphs-on-streamlit-6c401d4c99db
 pio.templates.default = "plotly_dark"
 # https://discuss.streamlit.io/t/streamlit-overrides-colours-of-plotly-chart/34943
@@ -74,6 +75,11 @@ def load_affil_geo_dict():
         affil_geo_dict = pickle.load(f)
     return affil_geo_dict
 
+
+
+#@st.experimental_memo
+def convert_df(df):
+    return df.to_csv(index=False).encode('utf-8')
 
 #########################################
 
@@ -303,6 +309,14 @@ const options = {
 #st.map(dfgeo)
 
 st.dataframe(centroids[['cluster','x','y','concepts','keywords']])
+csv_topics = convert_df(centroids[['cluster','x','y','concepts','keywords']])
+st.download_button(
+   "Press to Download Topics Table",
+   csv_topics,
+   "topics.csv",
+   "text/csv",
+   key='download-topics-csv'
+)
 #AgGrid(centroids[['cluster','x','y','concepts','keywords']])
 # https://medium.com/@hhilalkocak/streamlit-aggrid-6dbbab3afe03
 #gd = GridOptionsBuilder.from_dataframe(centroids[['cluster','x','y','concepts','keywords']])
@@ -442,9 +456,21 @@ df_selected_centroid = centroids[
 df_selected_papers = dfinfo[
     (dfinfo['cluster'] == selected_cluster)
 ].sort_values('probability',ascending=False)
-st.write(f"selected topic: {selected_cluster}")
+st.write(f"selected topic {selected_cluster}")
 st.dataframe(df_selected_centroid[['concepts','keywords','x','y']])
-st.write(f"publications in topic: {selected_cluster}")
+
+csv_selected_centroid = convert_df(df_selected_centroid[['concepts','keywords',
+                                                         'x','y']])
+st.download_button(
+   "Press to Download Selected Topic",
+   csv_selected_centroid,
+   "selected_topic.csv",
+   "text/csv",
+   key='download-selected-topic-csv'
+)
+
+
+st.write(f"publications in topic {selected_cluster}")
 st.data_editor(
         df_selected_papers[['x', 'y', 'id', 'title', 'doi', 'cluster', 
        'publication_date', 'keywords', 'top_concepts', 'affil_list',
@@ -455,6 +481,18 @@ st.data_editor(
         },
         hide_index=True,
         )
+
+csv_selected_papers = convert_df(df_selected_papers[['x', 'y', 'id', 'title', 'doi', 'cluster', 
+       'publication_date', 'keywords', 'top_concepts', 'affil_list',
+       'author_list','probability']])
+
+st.download_button(
+   f"Press to Download Selected Papers for topic {selected_cluster}",
+   csv_selected_papers,
+   f"selected_papers_{selected_cluster}.csv",
+   "text/csv",
+   key='download-selected-topic-papers-csv'
+)
 
 
 
@@ -634,6 +672,14 @@ with tab2:
         },
         hide_index=True,
     )
+    csv_dvaffils = convert_df(dvaffils)
+    st.download_button(
+       f"Press to Download Affiliations for topic {selected_cluster}",
+       csv_dvaffils,
+       f"affils_{selected_cluster}.csv",
+       "text/csv",
+       key='download-affils-csv'
+    )
     #st.dataframe(dvaffils)
 with tab3:
     st.write("highlight and click a value in the **paper_author_id** to be given more information")
@@ -643,6 +689,14 @@ with tab3:
             "paper_author_id": st.column_config.LinkColumn("paper_author_id")
         },
         hide_index=True,
+    )
+    csv_dvauthor = convert_df(dvauthor)
+    st.download_button(
+       f"Press to Download Authors for topic {selected_cluster}",
+       csv_dvauthor,
+       f"authors_{selected_cluster}.csv",
+       "text/csv",
+       key='download-authors-csv'
     )
     
 with tab4:
@@ -658,6 +712,14 @@ with tab4:
         },
         hide_index=True,
     )
+    csv_dvjournals = convert_df(dvjournals)
+    st.download_button(
+       f"Press to Download Journals for topic {selected_cluster}",
+       csv_dvjournals,
+       f"journals_{selected_cluster}.csv",
+       "text/csv",
+       key='download-journals-csv'
+    )
 
     
 with tab5:
@@ -665,6 +727,14 @@ with tab5:
     st.dataframe(
         dvconferences[['conference','paper_cluster_score']],
         hide_index=True
+    )
+    csv_dvconferences = convert_df(dvconferences)
+    st.download_button(
+       f"Press to Download Conferences for topic {selected_cluster}",
+       csv_dvauthor,
+       f"conferences_{selected_cluster}.csv",
+       "text/csv",
+       key='download-conferences-csv'
     )
   #  st.data_editor(
   #      dvconferences,
@@ -690,6 +760,16 @@ with tab7:
             "doi": st.column_config.LinkColumn("doi"),
         },
         hide_index=True,
+    )
+    csv_dvcollab = convert_df(dfcollab[['x', 'y', 'id','collab_countries', 'title', 'doi', 'cluster', 'probability',
+       'publication_date', 'keywords', 'top_concepts', 'affil_list',
+       'author_list','funder_list']])
+    st.download_button(
+       f"Press to Download Country-Country Collab for topic {selected_cluster}",
+       csv_dvcollab,
+       f"collab_{selected_cluster}.csv",
+       "text/csv",
+       key='download-collab-csv'
     )
     
 with tab8:
