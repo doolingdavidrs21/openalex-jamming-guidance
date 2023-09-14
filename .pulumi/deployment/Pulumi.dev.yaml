@@ -1,0 +1,9 @@
+encryptionsalt: v1:+VBoPE1utYQ=:v1:vS8ceKY3YCLEzSHL:7SAgSXrq788dhxQeYxD+zCgzXsPkfQ==
+config:
+  openalex-jamming:appLabels:
+    app: openalex-jamming
+  openalex-jamming:clusterStackReference: cluster/dev
+  openalex-jamming:commonStackReference: openalex-jamming-common/common
+  openalex-jamming:imageTag: "latest"
+  openalex-jamming:namespace: openalex-jamming
+  openalex-jamming:replicas: "1"

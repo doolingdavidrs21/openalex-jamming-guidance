@@ -1,0 +1,8 @@
+name: openalex-jamming
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Application Kubernetes deployment
+backend:
+  url: s3://rs21-infrastructure

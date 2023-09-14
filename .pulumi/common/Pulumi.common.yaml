@@ -1,0 +1,4 @@
+encryptionsalt: v1:nB/YzUJXTLw=:v1:OAIvMyed6ubeTpRK:ygwb3Ad3xEsjEV1dt8KlV/efIoCCGg==
+config:
+  aws:region: us-west-2
+  awsx:region: us-west-2
