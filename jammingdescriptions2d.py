@@ -20,8 +20,9 @@ from langchain.llms import OpenAI
 from langchain import PromptTemplate
 from langchain.chains import LLMChain
 
-openai_key = "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"  
-os.environ["OPENAI_API_KEY"] = openai_key
+#openai_key = "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"  
+#openai_key = "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"
+os.environ["OPENAI_API_KEY"] = st.secrets["DB_TOKEN"]
 
 llm = OpenAI(model_name = 'text-davinci-003',
              temperature=0.6,
