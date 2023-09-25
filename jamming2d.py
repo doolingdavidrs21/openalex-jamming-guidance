@@ -31,7 +31,11 @@ st.markdown("""
 * Missile guidance (variety of methods of guiding a missile), 导弹制导, Система самонаведения
 * Automatic target recognition (ability to automatically recognize targets), 自动目标识别, Otomatik hedef tanıma
 * Weapon target assignment problem, Задача о назначении целей
+* High-energy X-rays
+* Terminal guidance
+* Air-to-Air missile (guided missile designed to be carried by aircraft for attack against other aircraft), ракета «воздух-воздух», 空对空导弹 
 * Robot manipulator, 音樂調整器, манипулятор
+* Ballistic missile (missile that follows a sub-orbital ballistic flightpath), баллистическая ракета, 弹道导弹
 * Command and control
 """)
 
